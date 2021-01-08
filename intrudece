@@ -1,0 +1,172 @@
+cat /etc/os-release
+
+NAME="CentOS Linux"
+VERSION="7 (Core)"
+ID="centos"
+ID_LIKE="rhel fedora"
+VERSION_ID="7"
+PRETTY_NAME="CentOS Linux 7 (Core)"
+ANSI_COLOR="0;31"
+CPE_NAME="cpe:/o:centos:centos:7"
+HOME_URL="https://www.centos.org/"
+BUG_REPORT_URL="https://bugs.centos.org/"
+
+CENTOS_MANTISBT_PROJECT="CentOS-7"
+CENTOS_MANTISBT_PROJECT_VERSION="7"
+REDHAT_SUPPORT_PRODUCT="centos"
+REDHAT_SUPPORT_PRODUCT_VERSION="7"
+
+需要 3.0以上
+
+安装步骤
+1.卸载旧版本
+$ sudo yum remove docker \
+                  docker-client \
+                  docker-client-latest \
+                  docker-common \
+                  docker-latest \
+                  docker-latest-logrotate \
+                  docker-logrotate \
+                  docker-engine
+2.其他
+sudo yum install -y yum-utils
+
+设置仓库
+sudo yum-config-manager \
+    --add-repo \
+    https://download.docker.com/linux/centos/docker-ce.repo (默认国外)
+
+    sudo yum-config-manager \
+    --add-repo \
+    http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo（阿里云）
+
+
+安装docker
+$ sudo yum install docker-ce docker-ce-cli containerd.io
+
+启动docker
+systemctl start docker
+docker version
+
+docker run hello-world（没有会下载官方的）
+
+docker images
+
+
+
+Uninstall Docker Engine
+卸载依赖
+$ sudo yum remove docker-ce docker-ce-cli containerd.io
+删除资源
+$ sudo rm -rf /var/lib/docker  （默认工作路径）
+
+
+阿里云镜像加速
+登陆阿里云
+
+sudo mkdir -p /etc/docker
+sudo tee /etc/docker/daemon.json <<-'EOF'
+{
+  "registry-mirrors": ["https://aanfqf4d.mirror.aliyuncs.com"]
+}
+EOF
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+
+
+docker 如何工作的
+docker是一个client-server 的结构系统,docker守护进程运行
+
+docker为什么比vm更快
+1.docker比虚拟机更少的抽象层
+2.docker直接运用宿主的内核,vm需要Guest Os
+
+
+docker 命令
+docker version
+docker info
+docker -- help
+
+镜像命令
+docker images
+
+docker search mysql --filter=STARS=86  查询  --filter筛选
+
+docker 镜像下载
+docker pull mysql  分层下载  相同的文件可以共用 不需要重新下载
+## docker pull mysql  等价于 docker pull docker.io/library/mysql:latest
+Using default tag: latest       不指定tag 默认latest
+latest: Pulling from library/mysql
+6ec7b7d162b2: Pull complete
+fedd960d3481: Pull complete
+7ab947313861: Pull complete
+64f92f19e638: Pull complete
+3e80b17bff96: Pull complete
+014e976799f9: Pull complete
+59ae84fee1b3: Pull complete
+ffe10de703ea: Pull complete
+657af6d90c83: Pull complete
+98bfb480322c: Pull complete
+6aa3859c4789: Pull complete
+1ed875d851ef: Pull complete
+Digest: sha256:78800e6d3f1b230e35275145e657b82c3fb02a27b2d8e76aac2f5e90c1c30873   签名
+Status: Downloaded newer image for mysql:latest
+docker.io/library/mysql:latest   //正式地址
+
+
+删除镜像
+docker rmi -f <镜像id>
+docker rmi -f $(docker images -aq) 删除全部
+
+容器命令
+先有了镜像才能有容器
+docker run [参数] image
+-name 容器名
+-d 后台运行
+-it  交互方式运行
+-P 指定端口
+-p 随机指定端口
+
+docker ps 获取运行中的容器列表
+docker ps -a 获取运行历史
+docker ps -aq 值查询编号
+
+退出容器
+exit 容器停止退出
+ctrl+P+Q 不停止推出
+
+删除容器
+docker rm id删除容器 运行中删除不了
+docker rm -f $(docker ps -aq) 移除全部 循环查出id 然后移除
+
+启动容器
+docker start id
+重启
+docker restart id
+停止
+docker stop id
+杀死
+docker kill id
+
+
+docker run -d centos 启动后台
+再使用docker ps 查询 发现停止(未前台服务)
+
+
+查看日志命令
+docker logs --help 查看帮助
+docker logs -f -t --tail 10 id 实时打印  ctrl+c退出实时打印
+
+产看进程
+docker top id
+
+查看镜像元数据
+docker inspect id
+
+进入当前正在运行的容器
+docker exec -it id /bin/bash   #进入容器后打开一个新的终端
+docker attach id               #进入容器正在执行的终端
+
+将容器中的文件拷贝到主机上
+docker cp id:/地址   地址
+
