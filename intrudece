@@ -170,3 +170,13 @@ docker attach id               #进入容器正在执行的终端
 将容器中的文件拷贝到主机上
 docker cp id:/地址   地址
 
+
+//按住nginx
+1.docker search
+2.docker pull
+3.docker images
+4.docker run -d --name xxx -p 服务器端口:docker对应的端口 nginx
+5.docker ps
+6.curl localhost:3344
+
+
